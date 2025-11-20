@@ -1,0 +1,33 @@
+
+
+.bottom-nav-list {
+  display: flex;
+  justify-content: space-around;
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.bottom-nav-list li {
+  flex-grow: 1;
+}
+
+.bottom-nav-list a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #7f8c8d;
+  font-size: 0.75rem;
+  padding: 0.25rem 0;
+}
+
+.bottom-nav-list a svg {
+  font-size: 1.5rem; 
+  margin-bottom: 2px;
+}
+
+
+.bottom-nav-list a.active {
+  color: #007bff; 
+}
