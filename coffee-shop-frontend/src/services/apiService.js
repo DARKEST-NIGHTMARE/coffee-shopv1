@@ -45,3 +45,7 @@ export const getSalesReport = (startDate, endDate) =>
 
 export const registerUser = (userData) => api.post('/auth/register', userData);
 export const getAllStaffUsers = () => api.get('/auth/users');
+
+export const getAllPermissions = () => api.get('roles/permissions');
+export const getAllRoles = () => api.get('/roles');
+export const createRole = (roleData) => api.post('/roles',roleData);

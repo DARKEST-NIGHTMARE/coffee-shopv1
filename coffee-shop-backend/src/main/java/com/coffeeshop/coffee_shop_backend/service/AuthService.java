@@ -11,7 +11,7 @@ import com.coffeeshop.coffee_shop_backend.repository.StaffUserRepository;
 import com.coffeeshop.coffee_shop_backend.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +51,9 @@ public class AuthService {
 
         String jwtToken = jwtService.generateToken(user);
 
-        return new AuthResponse(jwtToken, user.getUsername(), user.getRole().getName());
+        return new AuthResponse(jwtToken, user.getUsername(), user.getRole().getName(),
+                user.getRole().getPermissions().stream()
+                        .map(Enum::name).collect(Collectors.toSet()));
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -67,10 +69,12 @@ public class AuthService {
 
         String jwtToken = jwtService.generateToken(user);
 
-        return new AuthResponse(jwtToken, user.getUsername(), user.getRole().getName());
+        return new AuthResponse(jwtToken, user.getUsername(), user.getRole().getName(),
+                user.getRole().getPermissions().stream()
+                        .map(Enum::name).collect(Collectors.toSet()));
     }
 
-    public List<StaffUserResponseDto> getAllStaff(){
+    public List<StaffUserResponseDto> getAllStaff() {
         return staffUserRepository.findAll().stream()
                 .map(StaffUserResponseDto::fromEntity)
                 .collect(Collectors.toList());

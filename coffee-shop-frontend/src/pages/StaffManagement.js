@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { getAllStaffUsers, registerUser } from '../services/apiService';
+import { getAllStaffUsers, registerUser, getAllRoles } from '../services/apiService';
 import './StaffManagement.css';
 
 const StaffManagement = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    role: 'ROLE_BARISTA', 
+    roleId: '', 
   });
   const [message, setMessage] = useState({ type: '', text: '' });
   const [users,setUsers] = useState([]);
+  const [rolesList,setRolesList] = useState([]);
 
   useEffect(() => {
     fetchUsers();
+    fetchRoles();
   },[]);
 
   const fetchUsers = async () => {
@@ -23,6 +25,18 @@ const StaffManagement = () => {
     catch(error){
         console.error("failed to fetch users",error);
 
+    }
+  }
+  const fetchRoles = async () => {
+    try {
+      const res = await getAllRoles();
+      setRolesList(res.data);
+      if(res.data.length > 0){
+        setFormData(prev => ({...prev, roleId:res.data[0].id }));
+      }
+    }
+    catch(err){
+      console.error("failed to fetch role",err);
     }
   }
 
@@ -44,7 +58,7 @@ const StaffManagement = () => {
       setFormData({
         username: '',
         password: '',
-        role: 'ROLE_BARISTA',
+        roleId: '',
       });
       fetchUsers();
     } catch (error) {
@@ -93,10 +107,12 @@ const StaffManagement = () => {
 
         <div className="form-group">
           <label>Role</label>
-          <select name="role" value={formData.role} onChange={handleChange}>
-            <option value="ROLE_BARISTA">Barista</option>
-            <option value="ROLE_MANAGER">Manager</option>
-            <option value="ROLE_CHEF">Chef</option>
+          <select name="roleId" value={formData.roleId} onChange={handleChange}>
+            {rolesList.map(role => (
+              <option key={role.id} value={role.id}>
+                {role.name}
+              </option>
+            ))}
           </select>
         </div>
 

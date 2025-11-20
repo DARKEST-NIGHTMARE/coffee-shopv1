@@ -4,11 +4,22 @@ const userToken = localStorage.getItem('userToken') || null;
 const userRole = localStorage.getItem('userRole') || null;
 const username = localStorage.getItem('username') || null;
 
+const loadPermissions = () => {
+  try{
+    const stored = localStorage.getItem('permissions');
+    return stored ? JSON.parse(stored) : [];
+  }
+  catch(err){
+    return [];
+  }
+}
+
 const initialState = {
-  token: userToken,
-  role: userRole,
-  user: username,
-  isAuthenticated: !!userToken, 
+  token: localStorage.getItem('userToken') || null,
+  role: localStorage.getItem('userRole') || null,
+  user: localStorage.getItem('username') || null,
+  permissions: loadPermissions(),
+  isAuthenticated: !!localStorage.getItem('userToken'), 
 };
 
 export const authSlice = createSlice({
@@ -16,26 +27,30 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     setCredentials: (state, action) => {
-      const { jwtToken, username, role } = action.payload;
+      const { jwtToken, username, roleName,permissions } = action.payload;
 
       localStorage.setItem('userToken', jwtToken);
-      localStorage.setItem('userRole', role);
+      localStorage.setItem('userRole', roleName);
       localStorage.setItem('username', username);
+      localStorage.setItem('permissions',JSON.stringify(permissions));
 
       state.token = jwtToken;
       state.user = username;
-      state.role = role;
+      state.role = roleName;
+      state.permissions = permissions;
       state.isAuthenticated = true;
     },
 
     logOut: (state) => {
-      localStorage.removeItem('userToken');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('username');
+      localStorage.clear();
+      // localStorage.removeItem('userToken');
+      // localStorage.removeItem('userRole');
+      // localStorage.removeItem('username');
 
       state.token = null;
       state.user = null;
       state.role = null;
+      state.permissions = [];
       state.isAuthenticated = false;
     },
   },
@@ -48,3 +63,4 @@ export default authSlice.reducer;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
 export const selectUserRole = (state) => state.auth.role;
 export const selectUsername = (state) => state.auth.user;
+export const selectUserPermissions = (state) => state.auth.permissions || [];
