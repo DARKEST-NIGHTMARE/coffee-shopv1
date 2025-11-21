@@ -1,12 +1,13 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectActiveOrders, updateOrder } from "../../features/orderSlice";
-import { selectUserRole } from "../../features/authSlice";
+import { selectUserPermissions } from "../../features/authSlice";
 
 const ActiveOrders = () => {
   const dispatch = useDispatch();
   const activeOrders = useSelector(selectActiveOrders);
-  const userRole = useSelector(selectUserRole);
+  const permissions = useSelector(selectUserPermissions)
+  // const userRole = useSelector(selectUserRole);
 
   const handleStartOrder = (orderId) => {
     dispatch(updateOrder({ orderId, status: "IN_PROGRESS" }));
@@ -23,8 +24,9 @@ const ActiveOrders = () => {
         {activeOrders.length === 0 && <p>No active orders.</p>}
         {activeOrders.map((order) => {
           const canComplete =
-            userRole === "ROLE_MANAGER" ||
-            (userRole === "ROLE_BARISTA" && order.status === "PREPARED");
+            permissions.includes("ORDER_CREATE") ||
+            (permissions.includes("ORDER_SERVE") && order.status === "PREPARED");
+            console.log(canComplete);
           return (
             <div key={order.id} className={`order-card ${order.status}`}>
               <h4>

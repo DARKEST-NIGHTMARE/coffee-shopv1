@@ -19,6 +19,7 @@ import KitchenInventory from "./pages/KitchenInventory";
 
 import RoleManagement from "./pages/RoleManagement";
 import "./App.css";
+import HomeDashboard from "./pages/HomeDashboard";
 
 // const OrderHistory = () => <h2>Order History</h2>;
 // const Reports = () => <h2>Reports</h2>;
@@ -79,7 +80,10 @@ function App() {
           }
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard" element={<HomeDashboard />} />
+
+          <Route path="orders" element={<PermissionRoute requiredPermission="ORDER_CREATE"><Dashboard /></PermissionRoute>}
+          />
 
           <Route path="order-history" element={<OrderHistory />} />
 

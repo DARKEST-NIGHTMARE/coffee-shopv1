@@ -13,7 +13,8 @@ import {
   LuUsers,
   LuUtensils,
   LuTrash2,
-  LuUserPlus
+  LuUserPlus,
+  LuHouse
 } from "react-icons/lu";
 import "./BottomNav.css";
 
@@ -24,9 +25,15 @@ const BottomNav = () => {
   return (
     <nav className="bottom-nav">
       <ul className="bottom-nav-list">
+        <li>
+          <NavLink to="/dashboard">
+          <LuHouse/>
+          <span>Home</span>
+          </NavLink>
+        </li>
         {hasPerm("ORDER_CREATE") && (
           <li>
-            <NavLink to="/dashboard">
+            <NavLink to="/orders">
               <LuLayoutDashboard />
               <span>Orders</span>
             </NavLink>
