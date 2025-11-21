@@ -92,12 +92,23 @@
   cursor: pointer;
   font-size: 1rem;
 }
-
 .btn-save {
-  background: #007bff;
+  background: #003a79;
   color: white;
+  
+  border-radius: 8px; 
+
+ 
+  border: none;      
+  padding: 10px 20px; 
+  cursor: pointer;    
+  font-weight: bold;
+ 
 }
 
+.btn-save:hover {
+  background: #002a5c;
+}
 .btn-cancel {
   background: #6c757d;
   color: white;

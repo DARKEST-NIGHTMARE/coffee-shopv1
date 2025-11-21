@@ -47,6 +47,23 @@
   border-color: #2196f3;
 }
 
+.btn-save {
+  background: #003a79;
+  color: white;
+  
+  border-radius: 8px; 
+
+  border: none;      
+  padding: 10px 20px; 
+  cursor: pointer;    
+  font-weight: bold;
+ 
+}
+
+
+.btn-save:hover {
+  background: #002a5c; 
+}
 .perm-card input {
   margin-right: 10px;
   transform: scale(1.2);

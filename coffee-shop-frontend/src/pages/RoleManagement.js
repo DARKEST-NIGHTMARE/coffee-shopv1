@@ -91,7 +91,7 @@ const RoleManagement = () => {
             ))}
           </div>
 
-          <button type="submit" className="btn-save">Save New Role</button>
+          <button type="submit" className="btn-save  ">Save New Role</button>
         </form>
       </div>
 
