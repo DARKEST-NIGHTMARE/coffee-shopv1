@@ -99,21 +99,20 @@
   background-color: #f9f9f9;
 }
 
-.role-badge {
+/* .role-badge {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.85rem;
   font-weight: bold;
-}
+} */
 
-.role-badge.ROLE_MANAGER {
+.role-badge {
   background-color: #e2e6ea;
   color: #2c3e50;
-  border: 1px solid #b0b8c1;
-}
-
-.role-badge.ROLE_BARISTA {
-  background-color: #dbeafe;
-  color: #1e40af;
-  border: 1px solid #93c5fd;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border: 1px solid #ccc;
+  white-space: nowrap;
 }

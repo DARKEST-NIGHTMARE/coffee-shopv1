@@ -105,7 +105,7 @@ const RoleManagement = () => {
                 <br/>
                 <small>{role.permissions.length} Permissions</small>
               </div>
-              <button className="btn-cancel" disabled>Edit (Coming Soon)</button>
+              <button className="btn-cancel" disabled>Edit (disabled)</button>
             </li>
           ))}
         </ul>

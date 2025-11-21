@@ -136,7 +136,7 @@ const StaffManagement = () => {
                   <td>{user.username}</td>
                   <td>
                     <span className={`role-badge ${user.role}`}>
-                      {user.role.replace('ROLE_', '')}
+                      {user.roleName}
                     </span>
                   </td>
                 </tr>

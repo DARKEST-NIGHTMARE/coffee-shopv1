@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { selectIsAuthenticated, selectUserRole } from "./features/authSlice";
+import { selectIsAuthenticated, selectUserPermissions, selectUserRole } from "./features/authSlice";
 
 import MainLayout from "./components/layout/MainLayout";
 
@@ -34,24 +34,30 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-const ManagerRoute = ({ children }) => {
-  const userRole = useSelector(selectUserRole);
-  if (userRole !== "ROLE_MANAGER") {
-    return <Navigate to="/dashboard" replace />;
-  }
-  return children;
-};
+// const ManagerRoute = ({ children }) => {
+//   const userRole = useSelector(selectUserRole);
+//   if (userRole !== "ROLE_MANAGER") {
+//     return <Navigate to="/dashboard" replace />;
+//   }
+//   return children;
+// };
 
-const ChefRoute = ({ children }) => {
-  const userRole = useSelector(selectUserRole);
-  if (userRole !== "ROLE_CHEF" && userRole !== "ROLE_MANAGER") {
-    return <Navigate to="/dashboard" replace />;
-  }
-  return children;
-};
+// const ChefRoute = ({ children }) => {
+//   const userRole = useSelector(selectUserRole);
+//   if (userRole !== "ROLE_CHEF" && userRole !== "ROLE_MANAGER") {
+//     return <Navigate to="/dashboard" replace />;
+//   }
+//   return children;
+// };
 
 const PermissionRoute = ({children,requiredPermission}) => {
-  const isAuthenticated = useSelector(selectIsAuthenticated)
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const permissions = useSelector(selectUserPermissions);
+
+  if(!isAuthenticated){
+    return <Navigate to="/login" replace/>
+  }
+  return children;
 }
 
 // const Dashboard = () => <h2>Dashboard Page</h2>;
@@ -74,63 +80,64 @@ function App() {
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
+
           <Route path="order-history" element={<OrderHistory />} />
 
           <Route
             path="menu"
             element={
-              <ManagerRoute>
+              <PermissionRoute requiredPermission="MENU_MANAGE">
                 <MenuManagement />
-              </ManagerRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="inventory"
             element={
-              <ManagerRoute>
+              <PermissionRoute requiredPermission="INVENTORY_MANAGE">
                 <InventoryManagement />
-              </ManagerRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="reports"
             element={
-              <ManagerRoute>
+              <PermissionRoute requiredPermission="REPORTS_VIEW">
                 <Reports />
-              </ManagerRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="kitchen"
             element={
-              <ChefRoute>
+              <PermissionRoute requiredPermission="ORDER_COOK">
                 <KitchenDashboard />
-              </ChefRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="kitchen-inventory"
             element={
-              <ChefRoute>
+              <PermissionRoute requiredPermission="STOCK_ADJUST">
                 <KitchenInventory />
-              </ChefRoute>
+              </PermissionRoute>
             }
           />
           <Route
             path="roles"
             element={
-              <ManagerRoute>
+              <PermissionRoute requiredPermission="ROLE_MANAGE">
                 <RoleManagement />
-              </ManagerRoute>
+              </PermissionRoute>
             }
           />
 
           <Route
             path="staff"
             element={
-              <ManagerRoute>
+              <PermissionRoute requiredPermission="STAFF_MANAGE">
                 <StaffManagement />
-              </ManagerRoute>
+              </PermissionRoute>
             }
           />
         </Route>
