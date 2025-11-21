@@ -7,6 +7,7 @@ import { fetchInventory, selectAllInventoryItems } from '../features/inventorySl
 
 import { LuCoffee, LuUtensils, LuTrendingUp, LuUsers } from "react-icons/lu";
 import { FiAlertTriangle } from "react-icons/fi";
+import { MdOutlinePendingActions } from "react-icons/md";
 
 import StatWidget from '../components/widgets/StatWidget';
 import ActionWidget from '../components/widgets/ActionWidget';
@@ -20,6 +21,7 @@ const HomeDashboard = () => {
   const username = useSelector(selectUsername);
   const activeOrders = useSelector(selectActiveOrders);
   const inventory = useSelector(selectAllInventoryItems);
+  console.log("permissions for dash "+permissions);
 
   const hasPerm = (p) => permissions.includes(p);
 
@@ -52,12 +54,12 @@ const HomeDashboard = () => {
           </div>
         )}
 
-        {hasPerm('KITCHEN_DISPLAY') && (
+        {hasPerm('ORDER_COOK') && (
           <>
             <StatWidget 
               title="Pending Orders" 
               value={pendingCount} 
-              icon={<LuCoffee />} 
+              icon={<MdOutlinePendingActions />} 
               color="#007bff"
               onClick={() => navigate('/kitchen')}
             />
@@ -65,7 +67,7 @@ const HomeDashboard = () => {
               title="Cooking Now" 
               value={cookingCount} 
               icon={<LuUtensils />} 
-              color="#f1c40f"
+              color="#ff7b00"
               onClick={() => navigate('/kitchen')}
             />
           </>
