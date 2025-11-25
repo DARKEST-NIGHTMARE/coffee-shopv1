@@ -1,22 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { fetchMenu } from '../features/menuSlice';
+import React, { useEffect, useState,useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchMenu, selectAllMenuItems } from '../features/menuSlice';
 import { fetchActiveOrders, placeNewOrder } from '../features/orderSlice';
 
 import MenuList from '../components/dashboard/MenuList';
 import CurrentOrder from '../components/dashboard/CurrentOrder';
 import ActiveOrders from '../components/dashboard/ActiveOrders';
+import MenuFilterBar from '../components/dashboard/MenuFilterBar';
 
 import './Dashboard.css'; 
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const menuItems = useSelector(selectAllMenuItems);
+
   const [cart, setCart] = useState([]);
+
+    const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   useEffect(() => {
     dispatch(fetchMenu());
     dispatch(fetchActiveOrders());
   }, [dispatch]);
+
+const filteredItems = useMemo(() => {
+    return menuItems.filter(item => {
+      const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = 
+        item.name.toLowerCase().includes(searchLower) || 
+        (item.description && item.description.toLowerCase().includes(searchLower));
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [menuItems, searchTerm, selectedCategory]);
+
 
   const handleAddItemToCart = (item) => {
     setCart((prevCart) => {
@@ -67,8 +86,19 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
-      <MenuList onAddItem={handleAddItemToCart} />
-      
+      <div className="dashboard-column menu-container-column">
+      <MenuFilterBar 
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
+              <MenuList 
+          items={filteredItems} 
+          onAddItem={handleAddItemToCart} 
+        />
+      </div>
+      <div className="dashboard-right-panel">
       <CurrentOrder 
         cart={cart}
         onPlaceOrder={handlePlaceOrder}
@@ -78,6 +108,7 @@ const Dashboard = () => {
       />
       
       <ActiveOrders />
+    </div>
     </div>
   );
 };
