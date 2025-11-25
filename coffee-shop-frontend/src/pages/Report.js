@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect,useMemo } from 'react';
 import { getSalesReport } from '../services/apiService';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -30,47 +30,78 @@ const getLocalDateTime = (date) => {
 const CATEGORIES =["Hot Beverages","Cold Beverages","Pastries","Sandwiches"]
 
 const Reports = () => {
-  const [startDate, setStartDate] = useState(getLocalDateTime(new Date(new Date().setHours(0, 0, 0, 0))));
-  const [endDate, setEndDate] = useState(getLocalDateTime(new Date()));
+  // const [startDate, setStartDate] = useState(getLocalDateTime(new Date(new Date().setHours(0, 0, 0, 0))));
+  const [startDate, setStartDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 7); 
+    date.setHours(0, 0, 0, 0);      
+    return getLocalDateTime(date);
+  });
+  // const [endDate, setEndDate] = useState(getLocalDateTime(new Date()));
+  const [endDate, setEndDate] = useState(() => {
+    return getLocalDateTime(new Date()); 
+  });
   const [reportData, setReportData] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [chartData, setChartData] = useState(null);
+  const [chartData, setChartData] = useState(null); //not used
 
-  const handleGenerateReport = async () => {
+const fetchReportData = async (start, end) => {
+    setLoading(true);
     setError(null);
     try {
-      const response = await getSalesReport(startDate, endDate);
-      const data = response.data;
-      setReportData(data);
-
-      const salesValues = CATEGORIES.map(catName => {
-        const found = data.salesByCategory.find(item => item.category === catName);
-        return found ? found.totalSales : 0;
-      });
-
-      setChartData({
-        labels: CATEGORIES,
-        datasets: [
-          {
-            label: 'Sales ($)',
-            data: salesValues,
-            backgroundColor:[
-              'rgba(255, 99, 132, 0.6)',
-              'rgba(54, 162, 235, 0.6)',
-              'rgba(255, 206, 86, 0.6)',
-              'rgba(75, 192, 192, 0.6)'
-            ],
-            borderWidth: 1,
-          },
-        ],
-      });
+      const response = await getSalesReport(start, end);
+      setReportData(response.data);
     } catch (err) {
-      setError('Failed to fetch report.');
+      setError('Failed to fetch report data.');
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchReportData(startDate, endDate);
+  }, []); 
 
+  // const handleGenerateReport = async () => {
+  //   setError(null);
+  //   try {
+  //     const response = await getSalesReport(startDate, endDate);
+  //     const data = response.data;
+  //     setReportData(data);
+
+  //     const salesValues = CATEGORIES.map(catName => {
+  //       const found = data.salesByCategory.find(item => item.category === catName);
+  //       return found ? found.totalSales : 0;
+  //     });
+
+  //     setChartData({
+  //       labels: CATEGORIES,
+  //       datasets: [
+  //         {
+  //           label: 'Sales ($)',
+  //           data: salesValues,
+  //           backgroundColor:[
+  //             'rgba(255, 99, 132, 0.6)',
+  //             'rgba(54, 162, 235, 0.6)',
+  //             'rgba(255, 206, 86, 0.6)',
+  //             'rgba(75, 192, 192, 0.6)'
+  //           ],
+  //           borderWidth: 1,
+  //         },
+  //       ],
+  //     });
+  //   } catch (err) {
+  //     setError('Failed to fetch report.');
+  //     console.error(err);
+  //   }
+  // };
+
+
+  const handleGenerateReport = () => {
+    fetchReportData(startDate, endDate);
+  };
   // const salesByCategoryData = {
   //   labels: ['Hot Drinks', 'Cold Drinks', 'Pastries', 'Sandwiches'],
   //   datasets: [
@@ -81,6 +112,34 @@ const Reports = () => {
   //     },
   //   ],
   // };
+
+
+
+    const chartConfig = useMemo(() => {
+    if (!reportData || !reportData.salesByCategory) return null;
+
+    const salesValues = CATEGORIES.map(catName => {
+      const found = reportData.salesByCategory.find(item => item.category === catName);
+      return found ? found.totalSales : 0;
+    });
+
+    return {
+      labels: CATEGORIES,
+      datasets: [
+        {
+          label: 'Sales ($)',
+          data: salesValues,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.6)', 
+            'rgba(54, 162, 235, 0.6)', 
+            'rgba(255, 206, 86, 0.6)', 
+            'rgba(75, 192, 192, 0.6)', 
+          ],
+          borderWidth: 1,
+        },
+      ],
+    };
+  }, [reportData]); 
 
   return (
     <div className="reports-container">
@@ -103,12 +162,16 @@ const Reports = () => {
             onChange={(e) => setEndDate(e.target.value)}
           />
         </div>
-        <button onClick={handleGenerateReport}>Generate Report</button>
+        <button onClick={handleGenerateReport} disabled={loading}>
+          {loading ? 'Loading...' : 'Generate Report'}
+        </button>
       </div>
 
       {error && <p className="error-message">{error}</p>}
 
-      {reportData && (
+      {loading && !reportData && <p>Loading sales data...</p>}
+
+      {!loading && reportData && (
         <>
           <div className="report-summary-grid">
             <div className="summary-card">
@@ -124,8 +187,7 @@ const Reports = () => {
           <div className="report-charts-grid">
             <div className="chart-container">
               <h3>Sales by Category</h3>
-              {/* <Bar data={salesByCategoryData} /> */}
-              {chartData ? <Bar data={chartData}/> : <p>Loading Chart....</p>}
+              {chartConfig ? <Bar data={chartConfig} /> : <p>No data available</p>}
             </div>
             <div className="top-items-container">
               <h3>Top Selling Items</h3>
@@ -138,13 +200,15 @@ const Reports = () => {
                 </thead>
                 <tbody>
                   {reportData.topSellingItems.length > 0 ? (
-                  reportData.topSellingItems.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.menuItemName}</td>
-                      <td>{item.quantitySold}</td>
-                    </tr>
-                  ))
-                ): (<tr><td colSpan="2">No items in this period</td></tr> )}
+                    reportData.topSellingItems.map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.menuItemName}</td>
+                        <td>{item.quantitySold}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr><td colSpan="2">No items sold in this period</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>

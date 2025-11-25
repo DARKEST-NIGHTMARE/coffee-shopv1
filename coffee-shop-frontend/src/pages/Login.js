@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 // import { authService } from '../services/authApi';
 import { setCredentials } from '../features/authSlice';
+import {api} from '../services/apiService';
 // import './Login.css';
 
 const Login = () => {
@@ -19,11 +20,15 @@ const Login = () => {
     setError(null); 
 
     try {
-      const response = await axios.post('http://localhost:8084/api/auth/login',
-        {
-          username,
-          password,
-        });
+      // const response = await axios.post('http://localhost:8084/api/auth/login',
+      //   {
+      //     username,
+      //     password,
+      //   });
+      const response = await api.post('/auth/login', {
+        username,
+        password,
+      });
       
       // const userData = await authService.login(username, password);
       const userData = response.data

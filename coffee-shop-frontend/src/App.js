@@ -23,7 +23,7 @@ import HomeDashboard from "./pages/HomeDashboard";
 
 // const OrderHistory = () => <h2>Order History</h2>;
 // const Reports = () => <h2>Reports</h2>;
-const NotFound = () => <h2>404 - Page Not Found</h2>;
+const NotFound = () =><div style={{padding: '2rem'}}> <h2>404 - Page Not Found</h2></div>;
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -57,6 +57,10 @@ const PermissionRoute = ({children,requiredPermission}) => {
 
   if(!isAuthenticated){
     return <Navigate to="/login" replace/>
+  }
+  if (!permissions.includes(requiredPermission)) {
+    console.log("ACCESS DENIED. Redirecting...");
+    return <Navigate to="/dashboard" replace />;
   }
   return children;
 }

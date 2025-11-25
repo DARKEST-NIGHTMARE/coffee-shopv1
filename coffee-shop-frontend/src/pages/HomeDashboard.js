@@ -21,18 +21,19 @@ const HomeDashboard = () => {
   const username = useSelector(selectUsername);
   const activeOrders = useSelector(selectActiveOrders);
   const inventory = useSelector(selectAllInventoryItems);
-  console.log("permissions for dash "+permissions);
+  // console.log("active "+activeOrders);
 
   const hasPerm = (p) => permissions.includes(p);
 
   useEffect(() => {
-    if (hasPerm('KITCHEN_DISPLAY')) dispatch(fetchActiveOrders());
+    if (hasPerm('ORDER_COOK')) dispatch(fetchActiveOrders());
     if (hasPerm('INVENTORY_READ')) dispatch(fetchInventory());
   }, [dispatch, permissions]);
 
   const pendingCount = activeOrders.filter(o => o.status === 'PENDING').length;
   const cookingCount = activeOrders.filter(o => o.status === 'IN_PROGRESS').length;
   const lowStockCount = inventory.filter(i => i.currentStock < i.reorderLevel).length;
+  // console.log("pending: ",pendingCount, "cook: ",cookingCount);
 
   return (
     <div className="home-dashboard">
