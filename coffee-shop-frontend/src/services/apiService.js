@@ -3,8 +3,8 @@ import axios from 'axios';
 
 
 export const api = axios.create({
-  // baseURL: 'http://localhost:8084/api',
-  baseURL: 'https://gxk3fw5r-8084.inc1.devtunnels.ms/api', 
+  baseURL: 'http://localhost:8084/api',
+  // baseURL: 'https://gxk3fw5r-8084.inc1.devtunnels.ms/api', 
 });
 
 // api.interceptors.request.use(

@@ -5,6 +5,7 @@ import com.coffeeshop.coffee_shop_backend.dto.OrderItemRequestDto;
 import com.coffeeshop.coffee_shop_backend.dto.OrderResponseDto;
 import com.coffeeshop.coffee_shop_backend.dto.OrderStatusUpdateRequestDto;
 import com.coffeeshop.coffee_shop_backend.model.*;
+import com.coffeeshop.coffee_shop_backend.repository.InventoryItemRepository;
 import com.coffeeshop.coffee_shop_backend.repository.MenuItemRepository;
 import com.coffeeshop.coffee_shop_backend.repository.OrderItemRepository;
 import com.coffeeshop.coffee_shop_backend.repository.ShopOrderRepository;
@@ -14,9 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,20 +24,24 @@ public class OrderService {
     private final ShopOrderRepository shopOrderRepository;
     private final OrderItemRepository orderItemRepository;
     private final MenuItemRepository menuItemRepository;
+    private final InventoryItemRepository inventoryItemRepository;
     private final InventoryService inventoryService;
 
     public OrderService(ShopOrderRepository shopOrderRepository,
                         OrderItemRepository orderItemRepository,
                         MenuItemRepository menuItemRepository,
+                        InventoryItemRepository inventoryItemRepository,
                         InventoryService inventoryService) {
         this.shopOrderRepository = shopOrderRepository;
         this.orderItemRepository = orderItemRepository;
         this.menuItemRepository = menuItemRepository;
+        this.inventoryItemRepository = inventoryItemRepository;
         this.inventoryService = inventoryService;
     }
 
     @Transactional
     public OrderResponseDto createOrder(OrderCreateRequestDto request) {
+        validateStockForNewOrder(request.items());
         StaffUser currentUser = (StaffUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         ShopOrder order = new ShopOrder();
@@ -76,6 +79,36 @@ public class OrderService {
         ShopOrder savedOrder = shopOrderRepository.save(order);
 
         return OrderResponseDto.fromEntity(savedOrder);
+    }
+
+    private void validateStockForNewOrder(List<OrderItemRequestDto> items) {
+        Map<Long, Double> requirements = new HashMap<>();
+
+        for (OrderItemRequestDto itemDto : items) {
+            MenuItem menuItem = menuItemRepository.findById(itemDto.menuItemId())
+                    .orElseThrow(() -> new RuntimeException("Menu item not found"));
+
+            for (RecipeComponent component : menuItem.getRecipeComponents()) {
+                Long invId = component.getInventoryItem().getId();
+                double needed = component.getQuantityConsumed() * itemDto.quantity();
+
+                requirements.put(invId, requirements.getOrDefault(invId, 0.0) + needed);
+            }
+        }
+        for (Map.Entry<Long, Double> entry : requirements.entrySet()) {
+            Long inventoryId = entry.getKey();
+            Double totalNeeded = entry.getValue();
+
+            InventoryItem stockItem = inventoryItemRepository.findById(inventoryId)
+                    .orElseThrow(() -> new RuntimeException("Inventory item not found"));
+
+            if (stockItem.getCurrentStock() < totalNeeded) {
+                throw new RuntimeException("Insufficient stock for: " + stockItem.getName() +
+                        ". Needed: " + totalNeeded +
+                        " " + stockItem.getUnitOfMeasure() +
+                        ", Available: " + stockItem.getCurrentStock());
+            }
+        }
     }
 
     @Transactional

@@ -71,7 +71,7 @@ const filteredItems = useMemo(() => {
   //   setCart((prevCart) => prevCart.filter((item) => item.id !== itemId));
   // };
 
-  const handlePlaceOrder = (tableName) => {
+  const handlePlaceOrder = async (tableName) => {
     const orderData = {
       tableName: tableName,
       items: cart.map((item) => ({
@@ -80,8 +80,14 @@ const filteredItems = useMemo(() => {
       })),
     };
     
-    dispatch(placeNewOrder(orderData));
-    setCart([]); 
+    try {
+      await dispatch(placeNewOrder(orderData)).unwrap();
+      setCart([]);
+      alert("Order placed successfully!");
+    } catch (error) {
+      console.error("Order failed: Check your inventory", error);
+      alert(`Order Failed: ${error.message || "Unknown Error"}`);
+    }
   };
 
   return (
@@ -109,7 +115,7 @@ const filteredItems = useMemo(() => {
       
       <ActiveOrders />
     </div>
-    </div>
+    </div>  
   );
 };
 
